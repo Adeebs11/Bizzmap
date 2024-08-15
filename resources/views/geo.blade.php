@@ -1,0 +1,328 @@
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Leaflet Map</title>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-search/dist/leaflet-search.min.css" />
+  <script src="https://unpkg.com/leaflet-search/dist/leaflet-search.min.js"></script>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXhW+ALEwIH" crossorigin="anonymous">
+  <link rel="shortcut icon" type="image/x-icon" href="{{ asset('img/favicon.ico') }}" />
+  <link rel="stylesheet" href="{{ asset('css/styles.css') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+</head>
+
+<body>
+  <div class="container-fluid">
+    <div class="map-wrapper">
+      <div id="map"></div>
+      <a href="javascript:history.back()" class="btn btn-light back-button">
+        <i class="fa fa-arrow-left"></i>
+      </a>
+      <label for="upload-csv" class="upload-button">
+        <i class="fa-solid fa-file-arrow-up"></i>
+        <input type="file" id="upload-csv" accept=".csv" style="display: none;" />
+      </label>
+    </div>
+    <div class="sidebar">
+      <div class="top-bar">
+        <button class="home-button" onclick="redirectToMenu()">
+          <i class="fa fa-home"></i>
+        </button>
+      </div>
+      <form id="dataForm">
+        <h2>Add Data</h2>
+        <div class="input-group">
+            <label for="customerName">Nama Customer</label>
+            <input type="text" id="customerName" name="customerName" required>
+        </div>
+        <div class="input-group">
+            <label for="address">Alamat</label>
+            <input type="text" id="address" name="address" required>
+        </div>
+        <div class="input-group">
+            <label for="latitude">Latitude</label>
+            <input type="number" id="latitude" name="latitude" step="any" required>
+        </div>
+        <div class="input-group">
+            <label for="longitude">Longitude</label>
+            <input type="number" id="longitude" name="longitude" step="any" required>
+        </div>
+        <div class="input-group">
+          <label for="type">Tipe Customer</label>
+          <div class="radio-group">
+            <input type="radio" id="indibiz" name="type" value="Indibiz" required>
+            <label for="indibiz">Indibiz</label>
+            <input type="radio" id="non-customer" name="type" value="Non-Customer" required>
+            <label for="non-customer">Non-Customer</label>
+          </div>
+        </div>
+        
+        <div class="input-group" id="segmen-indibiz" style="display: none;">
+          <label for="segmenIndibiz">Segmen Indibiz</label>
+          <select id="segmenIndibiz" name="segmenIndibiz">
+            <option value="Indibiz Sekolah">Indibiz Sekolah</option>
+            <option value="Indibiz Ruko">Indibiz Ruko</option>
+            <option value="Indibiz Hotel">Indibiz Hotel</option>
+            <option value="Indibiz MultiFinance">Indibiz MultiFinance</option>
+            <option value="Indibiz Health">Indibiz Health</option>
+            <option value="Indibiz Ekspedisi">Indibiz Ekspedisi</option>
+            <option value="Indibiz Energy">Indibiz Energy</option>
+          </select>
+        </div>
+        
+        <div class="input-group" id="segmen-non-customer" style="display: none;">
+          <label for="segmenNonCustomer">Segmen Non-Customer</label>
+          <select id="segmenNonCustomer" name="segmenNonCustomer">
+            <option value="Sekolah">Sekolah</option>
+            <option value="Ruko">Ruko</option>
+            <option value="Hotel">Hotel</option>
+            <option value="MultiFinance">MultiFinance</option>
+            <option value="Health">Health</option>
+            <option value="Ekspedisi">Ekspedisi</option>
+            <option value="Energy">Energy</option>
+          </select>
+        </div>
+
+        <button type="submit" class="btn-submit">Tambah Marker</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    var osm = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 19,
+      attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    });
+
+    var CartoDB_Voyager = L.tileLayer(
+      "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
+      {
+        maxZoom: 19,
+        attribution: '&copy; <a href="https://carto.com/attributions">CARTO</a>',
+      }
+    );
+
+    var Esri_WorldImagery = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+      }
+    );
+
+    var Esri_Labels = L.tileLayer(
+      "https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}", {
+        attribution: 'Labels &copy; Esri'
+      }
+    );
+
+    var Esri_WorldImagery_With_Labels = L.layerGroup([Esri_WorldImagery, Esri_Labels]);
+
+    var map = L.map("map", {
+        center: [-1.6097138916535554, 103.59584563774344],
+        zoom: 13,
+        layers: [
+            L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+                maxZoom: 19,
+                attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+            })
+        ],
+        attributionControl: false
+    });
+
+    var blueIcon = new L.Icon({
+      iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-icon-2x.png',
+      shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+      iconSize: [20, 33],
+      iconAnchor: [10, 33],
+      popupAnchor: [1, -28],
+      shadowSize: [33, 33],
+    });
+
+    var redIcon = new L.Icon({
+      iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
+      shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+      iconSize: [20, 33],
+      iconAnchor: [10, 33],
+      popupAnchor: [1, -28],
+      shadowSize: [33, 33],
+    });
+
+    L.control.layers({
+      "Variant 1": osm,
+      "Satellite": Esri_WorldImagery_With_Labels
+    }).addTo(map);
+
+    var markerGroup = L.layerGroup().addTo(map);
+
+    function toggleSegmenOptions() {
+        var type = document.querySelector('input[name="type"]:checked').value;
+        var segmenIndibiz = document.getElementById('segmen-indibiz');
+        var segmenNonCustomer = document.getElementById('segmen-non-customer');
+
+        if (type === "Indibiz") {
+            segmenIndibiz.style.display = 'block';
+            segmenNonCustomer.style.display = 'none';
+        } else if (type === "Non-Customer") {
+            segmenIndibiz.style.display = 'none';
+            segmenNonCustomer.style.display = 'block';
+        }
+    }
+
+    document.getElementById('dataForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        var name = document.getElementById('customerName').value;
+        var address = document.getElementById('address').value;
+        var lat = parseFloat(document.getElementById('latitude').value);
+        var lng = parseFloat(document.getElementById('longitude').value);
+        var type = document.querySelector('input[name="type"]:checked').value;
+        var segmen = (type === "Indibiz") ? document.getElementById('segmenIndibiz').value : document.getElementById('segmenNonCustomer').value;
+
+        addMarker(name, lat, lng, address, type, segmen);
+        saveData(name, lat, lng, address, type, segmen);
+    });
+
+    function addMarker(name, lat, lng, address, type, segmen) {
+        var icon = (type === "Indibiz") ? blueIcon : redIcon;
+
+        var marker = L.marker([lat, lng], { icon: icon, title: name })
+        .bindPopup(
+            `<div class='popup-content'>
+                <div class='popup-item'><strong>Nama Tempat: </strong>${name}</div>
+                <div class='popup-item'><strong>Alamat: </strong>${address}</div>
+                <div class='popup-item'><strong>Koordinat: </strong>${lat}, ${lng}</div>
+                <div class='popup-item'><strong>Tipe: </strong>${type}</div>
+                <div class='popup-item'><strong>Segmen: </strong>${segmen}</div>
+                <button class='btn-delete-marker'><i class='fas fa-trash-alt'></i></button>
+            </div>`
+        );
+
+        marker.options.popupText = marker._popup._content;
+        marker.on('popupopen', function() {
+            var deleteButton = document.querySelector('.leaflet-popup .btn-delete-marker');
+            deleteButton.addEventListener('click', function() {
+                markerGroup.removeLayer(marker);
+                removeMarkerFromStorage(name, lat, lng, address, type, segmen);
+            });
+        });
+        marker.addTo(markerGroup);
+    }
+
+    function removeMarkerFromStorage(name, lat, lng, address, type, segmen) {
+        var markers = JSON.parse(localStorage.getItem('markers')) || [];
+        markers = markers.filter(marker =>
+            !(marker.name === name &&
+              marker.latitude === lat &&
+              marker.longitude === lng &&
+              marker.address === address &&
+              marker.type === type &&
+              marker.segmen === segmen)
+        );
+        localStorage.setItem('markers', JSON.stringify(markers));
+    }
+
+    function saveData(name, lat, lng, address, type, segmen) {
+    let markers = JSON.parse(localStorage.getItem('markers')) || [];
+    markers.push({ name, latitude: lat, longitude: lng, address, type, segmen });
+    localStorage.setItem('markers', JSON.stringify(markers));
+}
+
+
+    function loadMarkers() {
+        var markers = JSON.parse(localStorage.getItem('markers')) || [];
+        markers.forEach(function(marker) {
+            addMarker(marker.name, marker.latitude, marker.longitude, marker.address, marker.type, marker.segmen);
+        });
+    }
+
+    loadMarkers();
+
+    function redirectToMenu() {
+        window.location.href = '{{ url("/menu") }}';
+    }
+
+    L.control.search({
+        layer: markerGroup,
+        initial: false,
+        propertyName: 'title',
+        marker: false,
+        moveToLocation: function(latlng, title, map) {
+            map.setView(latlng, 15);
+            var marker = markerGroup.getLayers().find(m => m.options.title === title);
+            if (marker) {
+                marker.openPopup();
+            }
+        }
+    }).addTo(map);
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const indibizRadio = document.getElementById('indibiz');
+        const nonCustomerRadio = document.getElementById('non-customer');
+        const segmenIndibiz = document.getElementById('segmen-indibiz');
+        const segmenNonCustomer = document.getElementById('segmen-non-customer');
+
+        function handleTypeChange() {
+            if (indibizRadio.checked) {
+                segmenIndibiz.style.display = 'block';
+                segmenNonCustomer.style.display = 'none';
+            } else if (nonCustomerRadio.checked) {
+                segmenIndibiz.style.display = 'none';
+                segmenNonCustomer.style.display = 'block';
+            }
+        }
+
+        indibizRadio.addEventListener('change', handleTypeChange);
+        nonCustomerRadio.addEventListener('change', handleTypeChange);
+
+        handleTypeChange();
+    });
+
+    map.on('click', function(e) {
+        var lat = e.latlng.lat;
+        var lng = e.latlng.lng;
+        document.getElementById('latitude').value = lat;
+        document.getElementById('longitude').value = lng;
+    });
+
+    // Fungsi untuk membaca file CSV dan menambahkan marker
+    document.getElementById('upload-csv').addEventListener('change', function(event) {
+        var file = event.target.files[0];
+        Papa.parse(file, {
+            header: true,
+            dynamicTyping: true,
+            complete: function(results) {
+                clearMarkers(); // Hapus semua marker lama sebelum menambahkan yang baru
+
+                var markers = results.data.filter(row => row.latitude && row.longitude);
+                
+                markers = markers.map(marker => {
+                    return {
+                        name: marker.name ? marker.name.trim() : 'Unknown',
+                        latitude: marker.latitude,
+                        longitude: marker.longitude,
+                        address: marker.address ? marker.address.trim() : 'No Address',
+                        type: marker.type ? marker.type.trim() : 'Unknown',
+                        segmen: marker.segmen ? marker.segmen.trim() : 'No Segment'
+                    };
+                });
+
+                markers.forEach(function(row) {
+                    addMarker(row.name, row.latitude, row.longitude, row.address, row.type, row.segmen);
+                    saveData(row.name, row.latitude, row.longitude, row.address, row.type, row.segmen);
+                });
+            }
+        });
+    });
+
+    function clearMarkers() {
+        markerGroup.clearLayers();
+        localStorage.removeItem('markers');
+    }
+
+  </script>
+</body>
+</html>
+
