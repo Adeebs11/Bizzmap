@@ -7,6 +7,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="{{ asset('css/styleanalytics.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+
 </head>
 <body>
     <div class="container mt-5">
@@ -101,6 +103,52 @@
     </div>
 
     <script>
+        // Add click event listeners to the count elements
+document.getElementById('indibiz-ruko-count').addEventListener('click', function() {
+    downloadSegmentData('Indibiz', 'Indibiz Ruko');
+});
+
+document.getElementById('indibiz-sekolah-count').addEventListener('click', function() {
+    downloadSegmentData('Indibiz', 'Indibiz Sekolah');
+});
+
+document.getElementById('indibiz-hotel-count').addEventListener('click', function() {
+    downloadSegmentData('Indibiz', 'Indibiz Hotel');
+});
+
+document.getElementById('indibiz-multifinance-count').addEventListener('click', function() {
+    downloadSegmentData('Indibiz', 'Indibiz MultiFinance');
+});
+
+document.getElementById('indibiz-health-count').addEventListener('click', function() {
+    downloadSegmentData('Indibiz', 'Indibiz Health');
+});
+
+document.getElementById('indibiz-ekspedisi-count').addEventListener('click', function() {
+    downloadSegmentData('Indibiz', 'Indibiz Ekspedisi');
+});
+
+document.getElementById('indibiz-energy-count').addEventListener('click', function() {
+    downloadSegmentData('Indibiz', 'Indibiz Energy');
+});
+
+// Function to download the data for a specific segment as XLSX
+function downloadSegmentData(type, segmen) {
+    var markers = JSON.parse(localStorage.getItem('markers')) || [];
+    var filteredMarkers = markers.filter(marker => marker.type === type && marker.segmen === segmen);
+
+    if (filteredMarkers.length === 0) {
+        alert('Tidak ada data marker untuk diunduh.');
+        return;
+    }
+
+    var worksheet = XLSX.utils.json_to_sheet(filteredMarkers);
+    var workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, `${segmen} Markers`);
+
+    XLSX.writeFile(workbook, `${segmen}_markers.xlsx`);
+}
+
         document.addEventListener('DOMContentLoaded', function () {
             function getDataFromStorage() {
                 return JSON.parse(localStorage.getItem('markers')) || [];

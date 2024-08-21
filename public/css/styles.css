@@ -82,7 +82,8 @@ input:focus {
   padding: 10px;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: space-between; 
+  overflow-y: hidden;
 }
 
 .top-bar {
@@ -107,15 +108,15 @@ input:focus {
 
 
 .home-button {
-  background: #C02016; /* Warna latar belakang tombol home */
+  background: #ffffff; /* Warna latar belakang tombol home */
   border: none;
-  color: white;
+  color: #C02016;
   cursor: pointer;
-  padding: 10px;
+  padding: 8px;
   border-radius: 50%;
   position: fixed; /* Membuat tombol tetap di satu posisi */
-  top: 20px; /* Jarak dari atas halaman */
-  right: 20px; /* Jarak dari kanan halaman */
+  top: 12px; /* Jarak dari atas halaman */
+  left: 56%; /* Jarak dari kanan halaman */
   z-index: 1000; /* Memastikan tombol berada di atas elemen lain */
 }
 
@@ -157,7 +158,24 @@ input:focus {
   transition: background-color 0.3s ease; 
 }
 
-.upload-button i {
+.download-button {
+  position: absolute;
+  top: 165px;
+  right: 60px;
+  background-color: white;
+  border: 2px solid #b2b2b2;
+  border-radius: 4px;
+  width: 47px;
+  padding: 8px;
+  cursor: pointer;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.3s ease; 
+}
+
+.upload-button i, .download-button i {
   font-size: 24px;
   color: #d10000;
 }
@@ -166,7 +184,7 @@ input:focus {
   display: none;
 }
 
-.upload-button:hover{
+.upload-button:hover, .download-button:hover {
   background-color: #d4d4d4;
 }
 
@@ -269,4 +287,146 @@ h2 {
 
 .radio-group input[type="radio"] {
   margin-right: 20px; /* Add margin between radio button and label */
+}
+.goals-plan-button {
+  font-family: 'Poppins', sans-serif; 
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background-color: #a01c14; /* Warna latar belakang tombol */
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  font-size: 1rem;
+  font-weight: 600;
+  z-index: 1000;
+}
+
+.goals-plan-button:hover {
+  background-color: #6a130e;
+}
+
+.goals-plan {
+  display: none;
+}
+
+.goals-plan-container {
+  background-color: #ffffff;
+  padding: 15px;
+  overflow-y: auto; /* Enable vertical scroll */
+  border: 1px solid #a9a9a9;
+  border-radius: 2px;
+  max-height: 500px; /* Set a max height to enable scrolling */
+  margin-bottom: 60px;
+}
+
+.goals-plan-item {
+  display: flex;
+  align-items: center;
+  color: #000000;
+  margin-bottom: 10px;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 10px;
+  font-size: 0.8rem;
+}
+
+.search-container {
+  margin-bottom: 15px;
+}
+
+.search-container input {
+  width: 100%;
+  padding: 8px;
+  font-size: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.goals-plan-item .marker-icon {
+  color: #000000;
+  margin-right: 10px;
+}
+
+.goals-plan-item .info {
+  flex: 1;
+}
+
+.goals-plan-item .actions {
+  display: flex;
+  align-items: center;
+}
+
+.goals-plan-item .actions button {
+  background: none;
+  border: solid 1px #000000;
+  padding: 10px;
+  color: #000000;
+  cursor: pointer;
+  margin-left: 10px;
+}
+
+.goals-plan-item .actions button.active {
+  background-color: red; /* Warna merah saat aktif */
+  color: #fff;
+}
+.goals-plan-item .actions button:hover {
+  text-decoration: underline;
+}
+/* General Button Styles */
+.btn-secondary {
+  font-family: 'Poppins', sans-serif; 
+  width: 50%;
+  padding: 10px 20px;
+  font-size: 16px;
+  font-weight: 600;
+  text-align: center;
+  text-decoration: none;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s, box-shadow 0.3s;
+}
+
+/* Specific Styles for 'Back to Form' Button */
+.btn-secondary {
+  background-color: #a01c14; /* Gray color for secondary button */
+  color: #fff; /* White text color */
+}
+
+.btn-secondary:hover {
+  background-color: #75130e; /* Slightly darker gray on hover */
+}
+
+.btn-secondary:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(108, 117, 125, 0.5); /* Focus shadow effect */
+}
+
+.btn-secondary:active {
+  background-color: #545b62; /* Even darker gray when clicked */
+}
+
+/* Optional: Add spacing for the button */
+.btn-secondary {
+  margin-top: 10px;
+}
+
+.btn-check.active {
+  background-color: red;
+  color: #fff;
+}
+
+.btn-check {
+  background-color: #fff;
+  border: 1px solid #ccc;
+  color: #000;
+  cursor: pointer;
+  margin-right: 5px;
+}
+
+#goals-plan {
+  display: none;
 }

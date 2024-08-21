@@ -17,7 +17,6 @@
                 <li><a href="{{ url("/menu") }}"><i class="fas fa-home"></i> <span>Home</span></a></li>
                 <li><a href="{{ url("/geo") }}"><i class="fas fa-map-marker-alt"></i> <span>Map</span></a></li>
                 <li><a href="{{ url("/analytics") }}"><i class="fas fa-chart-pie"></i> <span>Analytic</span></a></li>
-                
             </ul>
         </div>
         <div class="container mt-5" id="main-content">
@@ -43,7 +42,6 @@
                     <h2>0</h2>
                     <p>Segmen Non-Customer</p>
                 </div>
-                
             </div>
             <div class="row mb-4">
                 <div class="col-md-6 chart-container">
@@ -53,6 +51,8 @@
                     <canvas id="newChart"></canvas>
                 </div>
             </div>
+            <!-- Hapus grafik berikut ini jika tidak diperlukan -->
+            <!--
             <div class="row mb-4">
                 <div class="col-md-6 chart-container">
                     <canvas id="ageGenderChart"></canvas>
@@ -61,10 +61,9 @@
                     <canvas id="userLocationChart"></canvas>
                 </div>
             </div>
+            -->
         </div>
     </div>
     <script src="{{ asset('js/demografi.js') }}"></script>
 </body>
 </html>
-
-

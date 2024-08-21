@@ -41,6 +41,10 @@ p {
     font-size: 17px;
 }
 
+.highlighted-count {
+    cursor: pointer;
+}
+
 .btn-light {
     background-color: #f5f5f5;
     border: 1px solid #ddd;

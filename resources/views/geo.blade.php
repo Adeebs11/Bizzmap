@@ -14,6 +14,8 @@
   <link rel="stylesheet" href="{{ asset('css/styles.css') }}">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.17.0/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 </head>
 
 <body>
@@ -27,6 +29,9 @@
         <i class="fa-solid fa-file-arrow-up"></i>
         <input type="file" id="upload-csv" accept=".csv" style="display: none;" />
       </label>
+    <button id="download-xlsx" class="download-button">
+      <i class="fa-solid fa-file-arrow-down"></i>
+    </button>
     </div>
     <div class="sidebar">
       <div class="top-bar">
@@ -90,9 +95,20 @@
 
         <button type="submit" class="btn-submit">Tambah Marker</button>
       </form>
-    </div>
-  </div>
-
+      <button id="goals-plan-button" class="goals-plan-button">
+        Goals Plan
+      </button>
+      <div id="goals-plan" class="goals-plan" style="display: none;">
+        <h2>Goals Plan</h2>
+        <div id="goals-plan-container" class="goals-plan-container">
+          <div class="search-container">
+            <input type="text" id="goals-plan-search" placeholder="Cari...">
+          </div>
+          <!-- Daftar goals plan akan ditambahkan di sini oleh JavaScript -->
+        </div>
+        <button id="back-to-form-button" class="btn btn-secondary">Kembali ke Form</button>
+      </div>
+      
   <script>
     var osm = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
       maxZoom: 19,
@@ -184,6 +200,65 @@
         addMarker(name, lat, lng, address, type, segmen);
         saveData(name, lat, lng, address, type, segmen);
     });
+
+    document.getElementById('goals-plan-button').addEventListener('click', function() {
+    document.getElementById('dataForm').style.display = 'none';
+    document.getElementById('goals-plan').style.display = 'block';
+    loadGoalsPlan();
+});
+
+function loadGoalsPlan() {
+    var markers = JSON.parse(localStorage.getItem('markers')) || [];
+    var nonCustomerMarkers = markers.filter(marker => marker.type === 'Non-Customer');
+    var goalsPlanContainer = document.getElementById('goals-plan-container');
+    var searchInput = document.getElementById('goals-plan-search');
+
+    function renderMarkers(filteredMarkers) {
+        goalsPlanContainer.innerHTML = ''; // Clear existing content
+        goalsPlanContainer.insertAdjacentHTML('afterbegin', `
+            <div class="search-container">
+                <input type="text" id="goals-plan-search" placeholder="Cari...">
+            </div>
+        `);
+
+        filteredMarkers.forEach(marker => {
+            var item = document.createElement('div');
+            item.className = 'goals-plan-item';
+            item.innerHTML = `
+                <span class="marker-icon"><i class="fas fa-map-marker-alt"></i></span>
+                <div class="info">
+                    <div><strong>Nama:</strong> ${marker.name}</div>
+                    <div><strong>Koordinat:</strong> ${marker.latitude}, ${marker.longitude}</div>
+                    <div><strong>Alamat:</strong> ${marker.address}</div>
+                </div>
+                <div class="actions">
+                    <button class="btn-check"><i class="fas fa-check"></i></button>
+                    <button class="btn-info"><i class="fas fa-info-circle"></i></button>
+                </div>
+            `;
+            goalsPlanContainer.appendChild(item);
+        });
+
+        // Add event listeners to check buttons
+        document.querySelectorAll('.btn-check').forEach(button => {
+            button.addEventListener('click', () => {
+                button.classList.toggle('active');
+            });
+        });
+    }
+
+    renderMarkers(nonCustomerMarkers);
+
+    // Search functionality
+    searchInput.addEventListener('input', function() {
+        var query = searchInput.value.toLowerCase();
+        var filteredMarkers = nonCustomerMarkers.filter(marker =>
+            marker.name.toLowerCase().includes(query) ||
+            marker.address.toLowerCase().includes(query)
+        );
+        renderMarkers(filteredMarkers);
+    });
+}
 
     function addMarker(name, lat, lng, address, type, segmen) {
         var icon = (type === "Indibiz") ? blueIcon : redIcon;
@@ -321,8 +396,34 @@
         markerGroup.clearLayers();
         localStorage.removeItem('markers');
     }
+    // Fungsi untuk mengunduh marker sebagai file XLSX
+    document.getElementById('download-xlsx').addEventListener('click', function() {
+    var markers = JSON.parse(localStorage.getItem('markers')) || [];
+    if (markers.length === 0) {
+        alert('Tidak ada data marker untuk diunduh.');
+        return;
+    }
+
+    var worksheet = XLSX.utils.json_to_sheet(markers);
+    var workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Markers");
+
+    XLSX.writeFile(workbook, "Informasi pelanggan.xlsx");
+});
+// Misalnya tombol di dalam goals plan untuk kembali ke form
+document.getElementById('goals-plan-button').addEventListener('click', function() {
+  document.getElementById('dataForm').style.display = 'none';
+  document.getElementById('goals-plan').style.display = 'block';
+  document.getElementById('goals-plan-button').style.display = 'none'; 
+  loadGoalsPlan(); // Pastikan ini memuat goals plan dari local storage
+});
+
+document.getElementById('back-to-form-button').addEventListener('click', function() {
+  document.getElementById('dataForm').style.display = 'block';
+  document.getElementById('goals-plan').style.display = 'none';
+  document.getElementById('goals-plan-button').style.display = 'block';
+});
 
   </script>
 </body>
 </html>
-
